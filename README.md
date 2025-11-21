@@ -83,6 +83,10 @@ fn main() -> Result<()> {
 - **Cross-language:** Native Python bindings via PyO3
 - **Edge-optimised:** Runs entirely in-process with low memory and zero network latency
 
+Fred: Not sure if this matters for your coursework, but what would be really interesting and relevant for people who 
+are thinking about using this would be to run some benchmarking and post the results. I'd also be interested in some 
+pros and cons for using spatio vs other options that are out there, as a person who doesn't know much about spatial DBs.
+
 ## Examples
 
 ### 2D Spatial

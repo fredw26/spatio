@@ -710,6 +710,14 @@ impl StorageBackend for AOFBackend {
         self.memory.scan_prefix(prefix)
     }
 
+    /// The usage of Result for all of these methods feels a little strange to me. At the moment,
+    /// there's no way for these methods to produce an Error. It's a balancing act between future
+    /// proofing so you don't have to update the interface later if you introduce error cases later,
+    /// vs the developer overhead (and maybe a small perf overhead? Unclear) of having to do error
+    /// handling for every time you want to make a relatively simple query of "is_empty".
+    /// I guess my heuristic would be if you have some reasonable plans for future work that would
+    /// introduce errors, then returning result now is fine, but otherwise I'd think about
+    /// simplifying and just returning usize or bool, etc.
     fn len(&self) -> Result<usize> {
         self.memory.len()
     }

@@ -160,6 +160,12 @@ impl DB {
         self.inner
             .write_to_aof_if_needed(&key_bytes, value.as_ref(), opts.as_ref(), created_at)?;
 
+        // I didn't look too deep at the snapshot implementation, but could doing this in the request
+        // thread have performance implications? If we're calling this frequently and want
+        // high performance, some insert calls pausing to snapshot could be unacceptable.
+        // Also, if the snapshot call fails, we'll return an Error for the insert call, is that
+        // what we want? Seems like inserting in the DB shouldn't fail if snapshotting fails.
+        // Moving this to a background thread would avoid both the perf and the error concerns.
         #[cfg(feature = "snapshot")]
         self.inner.maybe_auto_snapshot()?;
 
@@ -301,6 +307,11 @@ impl DB {
         }
         let estimated_ratio = sample_expired as f64 / sampled as f64;
         if estimated_ratio > WARNING_THRESHOLD {
+            // Is the impact of high expired items ratio that we'll have performance degradation
+            // on operations? Is your intention for the user to manually manage cleanup calls?
+            // It'd be interesting to allow the user to specify a configured threshold for when
+            // cleanup should occur, and then have a background thread responsible for doing cleanup
+            // periodically.
             log::warn!(
                 "Estimated high expired items ratio: ~{:.1}% (sampled {} of {} keys). Consider calling cleanup_expired().",
                 estimated_ratio * 100.0,
